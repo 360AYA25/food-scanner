@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
   <title>Food Tracker - Сканер</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -20,101 +19,76 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
 
-    .header {
-      padding: 12px 16px;
+    .container {
       text-align: center;
-      background: rgba(0,0,0,0.8);
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
+      max-width: 320px;
+      width: 100%;
     }
 
-    .header h1 {
+    .icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--tg-theme-hint-color, #999);
+      margin-bottom: 32px;
+      line-height: 1.4;
+    }
+
+    .btn {
+      background: var(--tg-theme-button-color, #3390ec);
+      color: var(--tg-theme-button-text-color, #ffffff);
+      border: none;
+      border-radius: 12px;
+      padding: 16px 24px;
       font-size: 16px;
       font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .header .hint {
-      font-size: 12px;
-      color: var(--tg-theme-hint-color, #999);
-    }
-
-    #scanner-container {
-      flex: 1;
+      cursor: pointer;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding-top: 60px;
-      padding-bottom: 120px;
+      gap: 10px;
+      transition: all 0.2s;
+      margin-bottom: 12px;
     }
 
-    #reader {
-      width: 100%;
-      max-width: 500px;
+    .btn:active {
+      transform: scale(0.98);
+      opacity: 0.9;
     }
 
-    #reader video {
-      border-radius: 12px;
+    .btn:disabled {
+      opacity: 0.5;
+      transform: none;
     }
 
-    /* Override html5-qrcode styles */
-    #reader__scan_region {
-      background: transparent !important;
+    .btn-secondary {
+      background: var(--tg-theme-secondary-bg-color, #2c2c2e);
     }
 
-    #reader__dashboard {
-      display: none !important;
-    }
-
-    .scan-overlay {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 280px;
-      height: 150px;
-      border: 3px solid var(--tg-theme-button-color, #3390ec);
-      border-radius: 16px;
-      pointer-events: none;
-      z-index: 50;
-      box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
-    }
-
-    .scan-line {
-      position: absolute;
-      top: 50%;
-      left: 10px;
-      right: 10px;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #ff0000, transparent);
-      animation: scan 1.5s ease-in-out infinite;
-    }
-
-    @keyframes scan {
-      0%, 100% { top: 20%; opacity: 0.5; }
-      50% { top: 80%; opacity: 1; }
-    }
-
-    .footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 16px;
-      background: rgba(0,0,0,0.9);
-      text-align: center;
+    .btn-icon {
+      font-size: 20px;
     }
 
     .result {
-      padding: 12px 16px;
+      margin-top: 24px;
+      padding: 16px;
       background: var(--tg-theme-secondary-bg-color, #1c1c1e);
       border-radius: 12px;
-      margin-bottom: 12px;
       display: none;
     }
 
@@ -124,55 +98,39 @@
 
     .result.success {
       background: #34c759;
-      color: white;
     }
 
     .result.error {
       background: #ff3b30;
-      color: white;
+    }
+
+    .result-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
     }
 
     .result-text {
       font-size: 14px;
-      font-weight: 500;
+      word-break: break-all;
     }
 
-    .formats-hint {
+    .formats {
+      margin-top: 32px;
       font-size: 11px;
       color: var(--tg-theme-hint-color, #666);
-      margin-top: 8px;
     }
 
-    .btn {
-      background: var(--tg-theme-button-color, #3390ec);
-      color: var(--tg-theme-button-text-color, #ffffff);
-      border: none;
-      border-radius: 12px;
-      padding: 14px 24px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      transition: opacity 0.2s;
-    }
-
-    .btn:active {
-      opacity: 0.8;
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-    }
-
-    .btn-secondary {
-      background: var(--tg-theme-secondary-bg-color, #2c2c2e);
-      margin-top: 8px;
+    .platform-info {
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--tg-theme-hint-color, #888);
     }
 
     .loading {
       display: none;
-      text-align: center;
-      padding: 40px;
     }
 
     .loading.show {
@@ -180,8 +138,8 @@
     }
 
     .spinner {
-      width: 40px;
-      height: 40px;
+      width: 48px;
+      height: 48px;
       border: 3px solid rgba(255,255,255,0.2);
       border-top-color: var(--tg-theme-button-color, #3390ec);
       border-radius: 50%;
@@ -192,160 +150,99 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
+    /* Hidden file input */
+    #file-input {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <div class="header">
+  <div class="container">
+    <div class="icon">📷</div>
     <h1>Сканер штрих-кодов</h1>
-    <div class="hint">Наведите камеру на штрих-код</div>
-  </div>
+    <p class="subtitle">Отсканируйте штрих-код на упаковке продукта</p>
 
-  <div class="scan-overlay">
-    <div class="scan-line"></div>
-  </div>
-
-  <div id="scanner-container">
-    <div id="reader"></div>
     <div id="loading" class="loading">
       <div class="spinner"></div>
-      <div>Запуск камеры...</div>
+      <p>Открываю камеру...</p>
     </div>
-  </div>
 
-  <div class="footer">
+    <div id="buttons">
+      <button id="scan-btn" class="btn">
+        <span class="btn-icon">📸</span>
+        <span>Сканировать камерой</span>
+      </button>
+
+      <button id="photo-btn" class="btn btn-secondary">
+        <span class="btn-icon">🖼️</span>
+        <span>Загрузить фото</span>
+      </button>
+    </div>
+
+    <input type="file" id="file-input" accept="image/*" capture="environment">
+
     <div id="result" class="result">
+      <div id="result-icon" class="result-icon"></div>
       <div id="result-text" class="result-text"></div>
     </div>
-    <button id="send-btn" class="btn" style="display: none;">
-      Отправить
-    </button>
-    <div class="formats-hint">
-      EAN-13 • EAN-8 • UPC-A • UPC-E • Code-128
+
+    <div class="formats">
+      Поддерживаемые форматы: EAN-13 • EAN-8 • UPC-A • UPC-E
     </div>
+
+    <div id="platform-info" class="platform-info"></div>
   </div>
+
+  <!-- html5-qrcode for Android only -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
-    tg.enableClosingConfirmation();
 
+    const scanBtn = document.getElementById('scan-btn');
+    const photoBtn = document.getElementById('photo-btn');
+    const fileInput = document.getElementById('file-input');
     const resultDiv = document.getElementById('result');
+    const resultIcon = document.getElementById('result-icon');
     const resultText = document.getElementById('result-text');
-    const sendBtn = document.getElementById('send-btn');
     const loading = document.getElementById('loading');
+    const buttons = document.getElementById('buttons');
+    const platformInfo = document.getElementById('platform-info');
 
-    let html5QrCode = null;
-    let lastScannedCode = null;
-    let scanCooldown = false;
+    // Detect platform
+    const platform = tg.platform || 'unknown';
+    const isIOS = platform === 'ios' || /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isAndroid = platform === 'android' || /Android/i.test(navigator.userAgent);
+    const isMobile = isIOS || isAndroid;
 
-    // Supported barcode formats for products
-    const formatsToSupport = [
-      Html5QrcodeSupportedFormats.EAN_13,
-      Html5QrcodeSupportedFormats.EAN_8,
-      Html5QrcodeSupportedFormats.UPC_A,
-      Html5QrcodeSupportedFormats.UPC_E,
-      Html5QrcodeSupportedFormats.CODE_128,
-      Html5QrcodeSupportedFormats.CODE_39
-    ];
+    platformInfo.textContent = `Платформа: ${platform} | ${isIOS ? 'iOS' : isAndroid ? 'Android' : 'Desktop'}`;
 
-    function showResult(text, isSuccess) {
+    function showLoading(text) {
+      loading.querySelector('p').textContent = text || 'Загрузка...';
+      loading.classList.add('show');
+      buttons.style.display = 'none';
+    }
+
+    function hideLoading() {
+      loading.classList.remove('show');
+      buttons.style.display = 'block';
+    }
+
+    function showResult(icon, text, isSuccess) {
+      resultIcon.textContent = icon;
       resultText.textContent = text;
       resultDiv.className = 'result show ' + (isSuccess ? 'success' : 'error');
     }
 
-    function hideResult() {
-      resultDiv.className = 'result';
-    }
+    function sendBarcode(barcode) {
+      showResult('📤', 'Отправляю: ' + barcode, true);
 
-    async function startScanner() {
-      loading.classList.add('show');
-
-      try {
-        html5QrCode = new Html5Qrcode("reader", {
-          formatsToSupport: formatsToSupport,
-          verbose: false
-        });
-
-        const config = {
-          fps: 15,  // Higher FPS for faster scanning
-          qrbox: { width: 280, height: 150 },
-          aspectRatio: 1.777,  // 16:9
-          disableFlip: false,
-          experimentalFeatures: {
-            useBarCodeDetectorIfSupported: true  // Use native BarcodeDetector if available
-          }
-        };
-
-        await html5QrCode.start(
-          { facingMode: "environment" },  // Back camera
-          config,
-          onScanSuccess,
-          onScanFailure
-        );
-
-        loading.classList.remove('show');
-
-      } catch (err) {
-        loading.classList.remove('show');
-        console.error("Camera error:", err);
-        showResult("Ошибка камеры: " + err.message, false);
-
-        // Fallback to Telegram native scanner
-        setTimeout(() => {
-          try {
-            tg.showScanQrPopup({ text: 'Наведите камеру на штрих-код' });
-          } catch (e) {
-            tg.showAlert("Не удалось открыть камеру. Отправьте фото штрих-кода.");
-            tg.close();
-          }
-        }, 1500);
-      }
-    }
-
-    function onScanSuccess(decodedText, decodedResult) {
-      // Prevent duplicate scans
-      if (scanCooldown || decodedText === lastScannedCode) {
-        return;
-      }
-
-      scanCooldown = true;
-      lastScannedCode = decodedText;
-
-      // Haptic feedback
       try {
         tg.HapticFeedback.notificationOccurred('success');
       } catch (e) {}
-
-      console.log("Scanned:", decodedText, decodedResult);
-
-      // Validate barcode (8-14 digits for product barcodes)
-      const isValid = /^\d{8,14}$/.test(decodedText);
-
-      if (isValid) {
-        showResult("✅ " + decodedText, true);
-        sendBarcode(decodedText);
-      } else {
-        showResult("⚠️ Неверный формат: " + decodedText, false);
-        setTimeout(() => {
-          scanCooldown = false;
-          lastScannedCode = null;
-          hideResult();
-        }, 2000);
-      }
-    }
-
-    function onScanFailure(error) {
-      // Ignore scan failures (no barcode in frame)
-    }
-
-    function sendBarcode(barcode) {
-      // Stop scanner
-      if (html5QrCode) {
-        html5QrCode.stop().catch(() => {});
-      }
-
-      showResult("📤 Отправляю: " + barcode, true);
 
       setTimeout(() => {
         tg.sendData(JSON.stringify({
@@ -356,19 +253,106 @@
       }, 500);
     }
 
-    // Handle Telegram native scanner result (fallback)
+    function validateBarcode(code) {
+      // Product barcodes: 8-14 digits
+      return code && /^\d{8,14}$/.test(code);
+    }
+
+    // Main scan button - use Telegram native scanner (works on iOS!)
+    scanBtn.addEventListener('click', function() {
+      showLoading('Открываю камеру...');
+
+      try {
+        // Telegram's native scanner - works on both iOS and Android
+        tg.showScanQrPopup({
+          text: 'Наведите камеру на штрих-код продукта'
+        });
+      } catch (e) {
+        hideLoading();
+        showResult('❌', 'Ошибка: ' + e.message, false);
+      }
+    });
+
+    // Handle Telegram native scanner result
     tg.onEvent('qrTextReceived', function(data) {
-      if (data.data) {
-        onScanSuccess(data.data, { format: 'TELEGRAM_NATIVE' });
+      const code = data.data;
+      console.log('Scanned:', code);
+
+      try {
+        tg.closeScanQrPopup();
+      } catch (e) {}
+
+      hideLoading();
+
+      if (validateBarcode(code)) {
+        sendBarcode(code);
+      } else if (code && code.length > 0) {
+        // Send anyway, let backend handle
+        sendBarcode(code);
+      } else {
+        showResult('⚠️', 'Не удалось распознать штрих-код', false);
       }
     });
 
     tg.onEvent('scanQrPopupClosed', function() {
-      // User closed native scanner
+      hideLoading();
     });
 
-    // Start scanner on load
-    startScanner();
+    // Photo upload button
+    photoBtn.addEventListener('click', function() {
+      fileInput.click();
+    });
+
+    // Handle file selection
+    fileInput.addEventListener('change', async function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      showLoading('Распознаю штрих-код...');
+
+      try {
+        // Use html5-qrcode to scan from image
+        const html5QrCode = new Html5Qrcode("result", {
+          formatsToSupport: [
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,
+            Html5QrcodeSupportedFormats.CODE_128
+          ]
+        });
+
+        const result = await html5QrCode.scanFile(file, true);
+        console.log('File scan result:', result);
+
+        hideLoading();
+
+        if (validateBarcode(result)) {
+          sendBarcode(result);
+        } else if (result && result.length > 0) {
+          sendBarcode(result);
+        } else {
+          showResult('⚠️', 'Штрих-код не найден на фото', false);
+        }
+
+      } catch (err) {
+        console.error('Scan error:', err);
+        hideLoading();
+        showResult('⚠️', 'Штрих-код не найден. Попробуйте другое фото.', false);
+      }
+
+      // Reset input
+      fileInput.value = '';
+    });
+
+    // Desktop fallback - show message
+    if (!isMobile) {
+      scanBtn.innerHTML = '<span class="btn-icon">📸</span><span>Сканировать (только мобильный)</span>';
+      scanBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        tg.showAlert('Сканирование доступно только на мобильных устройствах. Используйте загрузку фото.');
+      }, true);
+    }
   </script>
 </body>
 </html>
